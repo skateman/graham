@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine:3.13
 MAINTAINER "Dávid Halász"
 LABEL description="RF 433MHz to MQTT transmitter for Home Assistant"
 
