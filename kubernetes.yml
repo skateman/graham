@@ -1,0 +1,84 @@
+# kubectl create namespace home
+# kubectl -n home create secret generic graham-mqtt --from-literal=mqtt_user=*** --from-literal=mqtt_pass=***
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: graham
+  namespace: home
+data:
+  mqtt_host: "***"
+  mqtt_port: "1883"
+  config: |
+    convert si
+    output kv
+    protocol 0
+    protocol 91
+    protocol 62
+    decoder n=Elro_DB270,m=OOK_PWM,s=300,l=930,r=11000,g=1500,repeats>=4,bits=25
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: graham
+  namespace: home
+spec:
+  selector:
+    app: graham
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graham
+  namespace: home
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: graham
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: graham
+    spec:
+      containers:
+      - image: quay.io/skateman/graham
+        name: graham
+        securityContext:
+          privileged: true
+        env:
+          - name: MQTT_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: graham
+                key: mqtt_host
+          - name: MQTT_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: graham
+                key: mqtt_port
+          - name: MQTT_USER
+            valueFrom:
+              secretKeyRef:
+                name: graham
+                key: mqtt_user
+          - name: MQTT_PASS
+            valueFrom:
+              secretKeyRef:
+                name: graham
+                key: mqtt_pass
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/rtl_433
+      volumes:
+      - name: config-volume
+        configMap:
+          name: graham
+          items:
+          - key: config
+            path: config
