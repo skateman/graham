@@ -19,6 +19,7 @@ RUN apk add --no-cache librtlsdr gcc make cmake curl jq musl-dev libusb-dev libr
     apk del gcc make cmake curl jq musl-dev libusb-dev librtlsdr-dev && \
     cd / && \
     rm -rf /tmp/merbanan-rtl_433* && \
-    mkdir -p /etc/rtl_433
+    mkdir -p /etc/rtl_433 && \
+    touch /etc/rtl_433/config
 
-CMD /usr/local/bin/rtl_433 -F mqtt://${MQTT_HOST}:${MQTT_PORT},user=${MQTT_USER},pass=${MQTT_PASS},retain=0,devices=rtl_433[/model]
+CMD /usr/local/bin/rtl_433 -F mqtt://${MQTT_HOST}:${MQTT_PORT},user=${MQTT_USER},pass=${MQTT_PASS},retain=0,devices=rtl_433[/model] -c /etc/rtl_433/config
