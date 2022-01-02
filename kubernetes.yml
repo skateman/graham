@@ -65,16 +65,24 @@ spec:
           - name: MQTT_USER
             valueFrom:
               secretKeyRef:
-                name: graham
+                name: graham-mqtt
                 key: mqtt_user
           - name: MQTT_PASS
             valueFrom:
               secretKeyRef:
-                name: graham
+                name: graham-mqtt
                 key: mqtt_pass
         volumeMounts:
         - name: config-volume
           mountPath: /etc/rtl_433
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - netstat -t | grep 1883 | grep ESTABLISHED
+          initialDelaySeconds: 30
+          periodSeconds: 10
       volumes:
       - name: config-volume
         configMap:
